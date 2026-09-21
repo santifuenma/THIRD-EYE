@@ -28,12 +28,6 @@ const PHOTO_COLUMNS =
 /** Tope de fotos por pagina de galeria. Suficiente para un portfolio personal. */
 export const GALLERY_LIMIT = 300;
 
-function isFrameworkError(error: unknown): boolean {
-  if (typeof error !== "object" || error === null || !("digest" in error)) return false;
-  const digest = (error as { digest?: unknown }).digest;
-  return typeof digest === "string" && (digest.startsWith("NEXT_") || digest === "DYNAMIC_SERVER_USAGE");
-}
-
 function toPhoto(row: PhotoRow): Photo {
   return {
     ...row,
@@ -42,31 +36,34 @@ function toPhoto(row: PhotoRow): Photo {
 }
 
 /**
- * Fotos publicadas, de la mas reciente a la mas antigua. Si Supabase falla no
- * se tira la pagina entera: se devuelve una galeria vacia.
+ * Fotos publicadas, de la mas reciente a la mas antigua.
+ *
+ * Si la consulta falla, se propaga el error a proposito. La home es una pagina
+ * prerenderizada: tragarse el fallo y devolver una lista vacia convierte un
+ * error pasajero de Supabase (o una migracion a medias) en una galeria vacia
+ * cacheada durante minutos. Dejandolo subir, Next mantiene servida la ultima
+ * version buena y lo reintenta en la siguiente peticion.
  */
 export async function getPhotos(): Promise<Photo[]> {
-  try {
-    const supabase = createPublicClient();
-    const { data, error } = await supabase
-      .from("photos")
-      .select(PHOTO_COLUMNS)
-      .order("created_at", { ascending: false })
-      .limit(GALLERY_LIMIT);
-
-    if (error) {
-      console.error("[photos] no se pudieron leer las fotos:", error.message);
-      return [];
-    }
-
-    return (data as PhotoRow[]).map(toPhoto);
-  } catch (error) {
-    // Los errores internos de Next (redirect, notFound, render dinamico) viajan
-    // como excepciones: hay que dejarlos pasar.
-    if (isFrameworkError(error)) throw error;
-    console.error("[photos] error inesperado leyendo las fotos:", error);
+  // Sin configurar (un clon recien bajado, sin .env.local) la galeria se queda
+  // vacia en vez de romper: ahi no hay ninguna version buena que preservar.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY) {
+    console.warn("[photos] Supabase sin configurar: la galeria se muestra vacia.");
     return [];
   }
+
+  const supabase = createPublicClient();
+  const { data, error } = await supabase
+    .from("photos")
+    .select(PHOTO_COLUMNS)
+    .order("created_at", { ascending: false })
+    .limit(GALLERY_LIMIT);
+
+  if (error) {
+    throw new Error(`No se pudieron leer las fotos: ${error.message}`);
+  }
+
+  return (data as PhotoRow[]).map(toPhoto);
 }
 
 /** Localizaciones ya usadas (para autocompletar el formulario de subida). */

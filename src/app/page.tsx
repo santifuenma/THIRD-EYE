@@ -4,8 +4,8 @@ import { SiteHeader } from "@/components/site-header";
 import { getPhotos } from "@/lib/photos";
 
 // La galeria es identica para todo el mundo: se prerenderiza y se refresca
-// cada 5 minutos (o al instante cuando subes o borras una foto).
-export const revalidate = 300;
+// cada minuto (o al instante cuando subes o borras una foto desde la app).
+export const revalidate = 60;
 
 export default async function HomePage() {
   const photos = await getPhotos();
