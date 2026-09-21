@@ -7,7 +7,7 @@ export function UploadSuccess({ onUploadMore }: { onUploadMore?: () => void }) {
   return (
     <div className="mx-auto flex min-h-dvh w-full max-w-[420px] flex-col items-center px-6 pb-8">
       <div className="flex flex-1 flex-col items-center justify-center gap-7">
-        <Logo size={128} className="h-[104px] w-[104px] sm:h-[128px] sm:w-[128px]" />
+        <Logo size={128} className="h-auto w-[104px] sm:w-[128px]" />
         <p className="text-[15px]">Pictures uploaded!</p>
       </div>
 

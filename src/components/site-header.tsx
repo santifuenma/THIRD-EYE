@@ -22,8 +22,8 @@ export function SiteHeader({
   const logoSize = size === "large" ? 120 : 96;
   const logoClass =
     size === "large"
-      ? "h-[92px] w-[92px] sm:h-[120px] sm:w-[120px]"
-      : "h-[72px] w-[72px] sm:h-[88px] sm:w-[88px]";
+      ? "h-auto w-[92px] sm:w-[120px]"
+      : "h-auto w-[72px] sm:w-[88px]";
 
   let logo;
   if (secret) {
