@@ -16,10 +16,10 @@ export const metadata: Metadata = {
     default: "Third Eye",
     template: "%s — Third Eye",
   },
-  description: "Use your third eye. View the world around you. Photographs by Santiago Fuenmayor Ruiz.",
+  description: "Use your third eye. To look at the world around you. Photographs by Santiago Fuenmayor Ruiz.",
   openGraph: {
     title: "Third Eye",
-    description: "Use your third eye. View the world around you.",
+    description: "Use your third eye. To look at the world around you.",
     url: siteUrl,
     siteName: "Third Eye",
     type: "website",

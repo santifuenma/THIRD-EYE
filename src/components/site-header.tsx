@@ -46,7 +46,7 @@ export function SiteHeader({
         <p className="caps mt-5 text-center text-[11px] leading-[1.8] font-medium sm:text-[12px]">
           Use your third eye
           <br />
-          View the world around you
+          To look at the world around you
         </p>
       ) : null}
     </header>
