@@ -73,6 +73,8 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
           placeholder={photo.blur_data_url ? "blur" : "empty"}
           blurDataURL={photo.blur_data_url ?? undefined}
           priority
+          quality={85}
+          sizes="(min-width: 640px) 90vw, 100vw"
           className="max-h-full w-auto max-w-full object-contain"
         />
       </div>

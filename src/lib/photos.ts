@@ -6,7 +6,6 @@ export type PhotoRow = {
   id: string;
   location: string;
   storage_path: string;
-  thumb_path: string;
   width: number;
   height: number;
   blur_data_url: string | null;
@@ -14,14 +13,13 @@ export type PhotoRow = {
   created_at: string;
 };
 
-/** Foto lista para pintar: con las URLs publicas ya resueltas. */
+/** Foto lista para pintar: con la URL publica ya resuelta. */
 export type Photo = PhotoRow & {
   url: string;
-  thumbUrl: string;
 };
 
 const PHOTO_COLUMNS =
-  "id, location, storage_path, thumb_path, width, height, blur_data_url, bytes, created_at";
+  "id, location, storage_path, width, height, blur_data_url, bytes, created_at";
 
 /** Tope de fotos por pagina de galeria. Suficiente para un portfolio personal. */
 export const GALLERY_LIMIT = 300;
@@ -36,7 +34,6 @@ function toPhoto(row: PhotoRow): Photo {
   return {
     ...row,
     url: storagePublicUrl(row.storage_path),
-    thumbUrl: storagePublicUrl(row.thumb_path),
   };
 }
 

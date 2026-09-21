@@ -16,7 +16,7 @@ proyecto de Vercel. Solo el dominio.
 | Framework | Next.js 16.2.10 (App Router, `src/app`, Turbopack) |
 | UI | React 19.2.4 + Tailwind v4 |
 | Datos | Supabase Postgres (tabla `photos`) |
-| Archivos | Supabase Storage (bucket público `photos`) |
+| Archivos | Supabase Storage (bucket público `photos`, una versión por foto) |
 | Auth | Supabase Auth, una sola cuenta (la tuya) |
 | Hosting | Vercel, proyecto propio con subdominio |
 
@@ -113,35 +113,39 @@ El portfolio personal no se toca en ningún momento.
 
 ## Cómo se gestiona el peso de las imágenes
 
-Todo el trabajo pesado ocurre en el navegador, antes de subir
+**Una sola versión por foto.** Al subir, el navegador la redimensiona a 3000 px
+de lado mayor y la recomprime a WebP calidad 0.85
 ([`src/lib/image.ts`](src/lib/image.ts)):
 
 1. Se decodifica el archivo aplicando la orientación EXIF.
-2. Se reduce en pasos de mitad de tamaño (evita el aliasing de un único
-   `drawImage`) hasta dos versiones:
-   - **full**: lado mayor 2000 px, WebP calidad 0.80 → la del visor.
-   - **thumb**: lado mayor 800 px, WebP calidad 0.72 → la de la retícula.
+2. Se reduce en pasos de mitad de tamaño — un único `drawImage` con un factor
+   de reducción grande deja la imagen con aliasing.
 3. Se genera un placeholder borroso de 12 px como data URL (~0,8 KB) que viaja
    en el HTML y evita el salto de layout mientras carga la foto.
-4. Se suben las dos versiones a Storage con `Cache-Control` de un año, y solo
-   entonces se guardan los metadatos en Postgres.
+4. Se sube a Storage con `Cache-Control` de un año, y solo entonces se guardan
+   los metadatos en Postgres.
 
-Medido con fotos de 4032×3024 (2,2 MB de origen): **518 KB** la versión grande y
-**75 KB** la miniatura, en ~0,6 s por foto. Una foto típica ronda los 300 KB en
-total, así que el 1 GB gratuito de Supabase da para unas 2.000.
+Medido: una vertical de 2250×4000 queda en 1688×3000 y 164 KB; una horizontal
+de 4032×3024 queda en 3000×2250 y 429 KB, en algo más de medio segundo. Con
+fotos de cámara y mucho detalle espera entre 400 KB y 1 MB, así que el 1 GB
+gratuito de Supabase da para unas mil.
 
-Dos consecuencias más:
+**Los tamaños de entrega los genera Vercel.** `next/image` pide a la
+optimización de Vercel exactamente los píxeles que necesita cada pantalla y los
+sirve en AVIF: la retícula de un móvil recibe ~1080 px de ancho, una tesela de
+escritorio ~640, el visor a pantalla completa hasta 2048. Por eso no se guarda
+una miniatura aparte — sería una copia peor de algo que Vercel ya sabe hacer, y
+limitaría la calidad de la retícula.
 
-- Repintar en un canvas **elimina los metadatos EXIF**, incluida la
-  geolocalización del móvil. La localización que se publica es solo la que
-  escribes a mano.
-- Como las fotos ya llegan optimizadas, `next.config.ts` marca
-  `images.unoptimized: true`: se sirven tal cual desde el CDN de Supabase y no
-  consumen cuota de transformaciones de Vercel. `<Image>` sigue dando lazy-load,
-  blur y reserva de espacio.
+El plan Hobby incluye del orden de mil imágenes fuente al mes, contadas una vez
+por foto sin importar cuántos tamaños se deriven de ella; un portfolio personal
+se queda en decenas. Si algún día estorba, `images.unoptimized: true` en
+[`next.config.ts`](next.config.ts) desactiva todo esto y sirve los originales
+tal cual.
 
-Si un día quieres que Vercel las reprocese, pon `unoptimized: false`: los
-`remotePatterns` del host de Supabase ya están configurados.
+Un efecto secundario que conviene conocer: repintar en un canvas **elimina los
+metadatos EXIF**, incluida la geolocalización del móvil. La localización que se
+publica es solo la que escribes a mano.
 
 ---
 

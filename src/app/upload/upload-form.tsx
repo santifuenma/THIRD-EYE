@@ -117,26 +117,19 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
 
         const id = crypto.randomUUID();
         const storagePath = id + "/full." + processed.extension;
-        const thumbPath = id + "/thumb." + processed.extension;
-        const options = {
+
+        setProgress({ index: index + 1, total: selected.length, step: "uploading" });
+        const upload = await storage.upload(storagePath, processed.blob, {
           contentType: processed.contentType,
           cacheControl: "31536000",
           upsert: false,
-        };
-
-        setProgress({ index: index + 1, total: selected.length, step: "uploading" });
-        const fullUpload = await storage.upload(storagePath, processed.full, options);
-        if (fullUpload.error) throw new Error(fullUpload.error.message);
+        });
+        if (upload.error) throw new Error(upload.error.message);
         orphans.push(storagePath);
-
-        const thumbUpload = await storage.upload(thumbPath, processed.thumb, options);
-        if (thumbUpload.error) throw new Error(thumbUpload.error.message);
-        orphans.push(thumbPath);
 
         setProgress({ index: index + 1, total: selected.length, step: "saving" });
         const saved = await createPhoto({
           storagePath,
-          thumbPath,
           width: processed.width,
           height: processed.height,
           blurDataUrl: processed.blurDataUrl,

@@ -11,20 +11,25 @@ function supabaseHostname(): string | undefined {
   }
 }
 
-const hostname = supabaseHostname();
-
 const nextConfig: NextConfig = {
   images: {
-    // Las fotos ya se suben redimensionadas y comprimidas (WebP) desde el
-    // navegador, asi que no hace falta volver a optimizarlas en Vercel: se
-    // sirven tal cual desde el CDN de Supabase Storage y no consumen cuota de
-    // transformaciones. `<Image>` sigue dando lazy-load, blur y reserva de
-    // espacio. Si algun dia quieres que Vercel las reprocese, pon esto en
-    // false y deja los remotePatterns de abajo.
-    unoptimized: true,
-    remotePatterns: hostname
-      ? [{ protocol: "https", hostname, pathname: "/storage/v1/object/public/**" }]
-      : [],
+    // Vercel reescala cada foto al tamano exacto que pide la pantalla y la
+    // sirve en AVIF. Es lo que evita que una foto vertical se vea borrosa en
+    // el movil: del original de Storage salen versiones de 640, 1080, 1920...
+    // y el navegador coge la suya. El plan Hobby incluye del orden de mil
+    // imagenes fuente al mes; un portfolio personal se queda en decenas.
+    formats: ["image/avif", "image/webp"],
+    qualities: [75, 85],
+    // Las rutas llevan un uuid, asi que el contenido nunca cambia: se puede
+    // cachear un ano.
+    minimumCacheTTL: 31_536_000,
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: supabaseHostname() ?? "*.supabase.co",
+        pathname: "/storage/v1/object/public/**",
+      },
+    ],
   },
 };
 

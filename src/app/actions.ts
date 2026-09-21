@@ -10,7 +10,6 @@ export type ActionResult<T = null> = { ok: true; data: T } | { ok: false; error:
 
 export type NewPhotoInput = {
   storagePath: string;
-  thumbPath: string;
   width: number;
   height: number;
   blurDataUrl: string;
@@ -45,7 +44,7 @@ export async function createPhoto(input: NewPhotoInput): Promise<ActionResult<{ 
   if (!location || location.length > LOCATION_MAX_LENGTH) {
     return { ok: false, error: "Escribe la localizacion (maximo 80 caracteres)." };
   }
-  if (!STORAGE_PATH_RE.test(input.storagePath) || !STORAGE_PATH_RE.test(input.thumbPath)) {
+  if (!STORAGE_PATH_RE.test(input.storagePath)) {
     return { ok: false, error: "Ruta de archivo no valida." };
   }
   if (!isPositiveInt(input.width, 10_000) || !isPositiveInt(input.height, 10_000)) {
@@ -68,7 +67,6 @@ export async function createPhoto(input: NewPhotoInput): Promise<ActionResult<{ 
       owner_id: user.id,
       location,
       storage_path: input.storagePath,
-      thumb_path: input.thumbPath,
       width: input.width,
       height: input.height,
       blur_data_url: input.blurDataUrl,
@@ -95,7 +93,7 @@ export async function deletePhoto(id: string): Promise<ActionResult> {
 
   const { data: photo, error: readError } = await supabase
     .from("photos")
-    .select("storage_path, thumb_path")
+    .select("storage_path")
     .eq("id", id)
     .maybeSingle();
 
@@ -105,9 +103,11 @@ export async function deletePhoto(id: string): Promise<ActionResult> {
   const { error: deleteError } = await supabase.from("photos").delete().eq("id", id);
   if (deleteError) return { ok: false, error: deleteError.message };
 
+  // La segunda ruta solo existe en las fotos subidas cuando ademas se guardaba
+  // una miniatura; borrar una clave que no esta es inocuo.
   const { error: storageError } = await supabase.storage
     .from(PHOTOS_BUCKET)
-    .remove([photo.storage_path, photo.thumb_path]);
+    .remove([photo.storage_path, photo.storage_path.replace("/full.", "/thumb.")]);
 
   // La fila ya no esta: si el borrado del archivo falla solo queda basura en
   // Storage, no una foto rota en la galeria.

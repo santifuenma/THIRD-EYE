@@ -1,29 +1,34 @@
 /**
  * Procesado de imagenes en el navegador: antes de subir nada a Supabase la foto
- * se redimensiona, se recomprime a WebP y se genera una miniatura + un
- * placeholder borroso. Asi la galeria pesa poco y el Storage no se llena.
+ * se redimensiona, se recomprime a WebP y se le calcula un placeholder borroso.
+ *
+ * Se guarda una sola version de cada foto. Las medidas que necesita cada
+ * pantalla (la reticula en el movil, el visor en un portatil) las genera Vercel
+ * a partir de ella, asi que no tiene sentido guardar una miniatura aparte: solo
+ * ocuparia sitio y limitaria la calidad de la reticula.
  *
  * Como efecto secundario, volver a pintar la imagen en un canvas elimina los
  * metadatos EXIF (incluida la geolocalizacion del movil).
  */
 
-/** Lado mayor de la version grande (la del visor a pantalla completa). */
-export const FULL_MAX_EDGE = 2000;
-/** Lado mayor de la miniatura (la de la retícula). */
-export const THUMB_MAX_EDGE = 800;
+/**
+ * Lado mayor de la foto que se guarda.
+ *
+ * 3000 px deja ~1690 de ancho en una vertical 9:16: de sobra para el visor a
+ * pantalla completa en un portatil retina, y para que la reticula del movil
+ * (que pide unos 1100 px de ancho a DPR 3) se vea nitida.
+ */
+export const MAX_EDGE = 3000;
 /** Lado mayor del placeholder borroso embebido en el HTML. */
 const BLUR_MAX_EDGE = 12;
 
-const FULL_QUALITY = 0.8;
-const THUMB_QUALITY = 0.72;
+const QUALITY = 0.85;
 
 export const ACCEPTED_MIME = "image/*";
 export const MAX_INPUT_BYTES = 40 * 1024 * 1024;
 
 export type ProcessedImage = {
-  full: Blob;
-  thumb: Blob;
-  /** Dimensiones de la version grande. */
+  blob: Blob;
   width: number;
   height: number;
   extension: "webp" | "jpg";
@@ -146,48 +151,38 @@ export async function processImage(file: File): Promise<ProcessedImage> {
 
   const decoded = await decode(file);
   try {
-    const fullSize = scaledSize(decoded.width, decoded.height, FULL_MAX_EDGE);
-    const thumbSize = scaledSize(decoded.width, decoded.height, THUMB_MAX_EDGE);
+    const size = scaledSize(decoded.width, decoded.height, MAX_EDGE);
     const blurSize = scaledSize(decoded.width, decoded.height, BLUR_MAX_EDGE);
 
-    const fullCanvas = drawResized(
+    const canvas = drawResized(
       decoded.source,
       decoded.width,
       decoded.height,
-      fullSize.width,
-      fullSize.height,
-    );
-    const thumbCanvas = drawResized(
-      fullCanvas,
-      fullSize.width,
-      fullSize.height,
-      thumbSize.width,
-      thumbSize.height,
+      size.width,
+      size.height,
     );
     const blurCanvas = drawResized(
-      thumbCanvas,
-      thumbSize.width,
-      thumbSize.height,
+      canvas,
+      size.width,
+      size.height,
       blurSize.width,
       blurSize.height,
     );
 
-    const full = await encode(fullCanvas, FULL_QUALITY);
-    const thumb = await encode(thumbCanvas, THUMB_QUALITY);
+    const encoded = await encode(canvas, QUALITY);
     const blurDataUrl = blurCanvas.toDataURL(
-      full.contentType === "image/webp" ? "image/webp" : "image/jpeg",
+      encoded.contentType === "image/webp" ? "image/webp" : "image/jpeg",
       0.5,
     );
 
     return {
-      full: full.blob,
-      thumb: thumb.blob,
-      width: fullSize.width,
-      height: fullSize.height,
-      extension: full.extension,
-      contentType: full.contentType,
+      blob: encoded.blob,
+      width: size.width,
+      height: size.height,
+      extension: encoded.extension,
+      contentType: encoded.contentType,
       blurDataUrl,
-      bytes: full.blob.size + thumb.blob.size,
+      bytes: encoded.blob.size,
     };
   } finally {
     decoded.release();

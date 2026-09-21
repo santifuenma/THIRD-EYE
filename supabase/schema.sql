@@ -12,7 +12,6 @@ create table if not exists public.photos (
   owner_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   location text not null check (char_length(location) between 1 and 80),
   storage_path text not null,
-  thumb_path text not null,
   width integer not null check (width > 0),
   height integer not null check (height > 0),
   blur_data_url text,
@@ -21,6 +20,10 @@ create table if not exists public.photos (
 );
 
 create index if not exists photos_created_at_idx on public.photos (created_at desc);
+
+-- Migracion: antes se guardaba ademas una miniatura. Ahora hay una sola
+-- version de cada foto y Vercel genera los tamanos que pide cada pantalla.
+alter table public.photos drop column if exists thumb_path;
 
 alter table public.photos enable row level security;
 
@@ -58,7 +61,7 @@ create policy "Owner can delete photos"
 -- ---------------------------------------------------------------------------
 -- Bucket de Storage
 -- Limite de 15 MB por archivo: las fotos se suben ya comprimidas desde el
--- navegador (WebP, lado mayor 2000 px), asi que rondan 300-600 KB.
+-- navegador (WebP, lado mayor 3000 px), asi que rondan 400 KB - 1 MB.
 -- ---------------------------------------------------------------------------
 insert into storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
 values ('photos', 'photos', true, 15728640, array['image/webp', 'image/jpeg'])
