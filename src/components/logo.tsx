@@ -11,6 +11,9 @@ const RATIO = 81 / 97;
 /**
  * Marca THIRD EYE. Hereda el color del texto (`currentColor`), asi que se
  * puede invertir sobre fondo oscuro con `text-paper`.
+ *
+ * Generado por scripts/build-logo.mjs desde public/logo.svg: no editar a mano,
+ * cambia el SVG y ejecuta `npm run logo`.
  */
 export function Logo({ size = 96, className, title = "Third Eye" }: LogoProps) {
   return (

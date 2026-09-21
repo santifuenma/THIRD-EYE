@@ -191,6 +191,7 @@ src/
 └─ proxy.ts               # refresco de sesión + guardia de /upload
 
 supabase/schema.sql       # tabla, bucket y políticas RLS
+scripts/build-logo.mjs    # public/logo.svg -> componente + favicon
 ```
 
 ## Scripts
@@ -200,4 +201,17 @@ npm run dev        # desarrollo
 npm run build      # build de producción
 npm run lint       # eslint
 npm run typecheck  # tsc --noEmit
+npm run logo       # regenera el logo desde public/logo.svg
 ```
+
+## Cambiar el logo
+
+El logo va embebido en el JSX para que herede el color del texto y no cueste una
+petición extra, así que editar el SVG no basta por sí solo:
+
+1. Sustituye [`public/logo.svg`](public/logo.svg).
+2. `npm run logo` — regenera `src/components/logo.tsx` y el favicon
+   `src/app/icon.svg`.
+
+El componente calcula el alto a partir del `viewBox`, así que un SVG con otra
+proporción no se deforma. Nunca edites `logo.tsx` a mano: el script lo pisa.

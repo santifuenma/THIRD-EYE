@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "logo": "node scripts/build-logo.mjs"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.7",
