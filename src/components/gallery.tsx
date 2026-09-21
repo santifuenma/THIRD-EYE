@@ -133,14 +133,19 @@ export function Gallery({ photos }: { photos: Photo[] }) {
   );
 }
 
-/** Pie de foto: la localizacion a un lado y la fecha de captura al otro. */
+/** Pie de foto: fecha y lugar a la izquierda, con que se hizo a la derecha. */
 function Caption({ photo }: { photo: Photo }) {
   const date = formatTakenAt(photo.taken_at);
 
   return (
-    <span className="mt-2 flex items-baseline justify-between gap-3 text-left text-[11px] text-ink/70">
-      <span>{photo.location}</span>
-      {date ? <span className="shrink-0">{date}</span> : null}
+    <span className="mt-2 flex items-start justify-between gap-4 text-left text-[11px] leading-[1.6] text-ink/70">
+      <span className="min-w-0">
+        {date ? <span className="block">{date}</span> : null}
+        <span className="block">{photo.location}</span>
+      </span>
+      {photo.device ? (
+        <span className="shrink-0 text-right">Taken on {photo.device}</span>
+      ) : null}
     </span>
   );
 }

@@ -58,6 +58,9 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
           {formatTakenAt(photo.taken_at) ? (
             <span className="shrink-0 text-muted">{formatTakenAt(photo.taken_at)}</span>
           ) : null}
+          {photo.device ? (
+            <span className="hidden shrink-0 text-muted sm:inline">Taken on {photo.device}</span>
+          ) : null}
         </span>
         <button
           type="button"

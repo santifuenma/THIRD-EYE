@@ -2,7 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 
-import { LOCATION_MAX_LENGTH } from "@/lib/constants";
+import { DEVICE_MAX_LENGTH, LOCATION_MAX_LENGTH } from "@/lib/constants";
 import { isPlausibleTakenAt } from "@/lib/dates";
 import { PHOTOS_BUCKET } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
@@ -13,6 +13,8 @@ export type NewPhotoInput = {
   storagePath: string;
   /** Fecha de captura en formato `YYYY-MM-DD`. */
   takenAt: string;
+  /** Camara o movil. Opcional: no todas las fotos traen EXIF. */
+  device: string;
   width: number;
   height: number;
   blurDataUrl: string;
@@ -53,6 +55,11 @@ export async function createPhoto(input: NewPhotoInput): Promise<ActionResult<{ 
   if (!isPlausibleTakenAt(input.takenAt)) {
     return { ok: false, error: "La fecha no es valida." };
   }
+
+  const device = input.device?.trim() ?? "";
+  if (device.length > DEVICE_MAX_LENGTH) {
+    return { ok: false, error: "El nombre del dispositivo es demasiado largo." };
+  }
   if (!isPositiveInt(input.width, 10_000) || !isPositiveInt(input.height, 10_000)) {
     return { ok: false, error: "Dimensiones de imagen no validas." };
   }
@@ -73,6 +80,7 @@ export async function createPhoto(input: NewPhotoInput): Promise<ActionResult<{ 
       owner_id: user.id,
       location,
       taken_at: input.takenAt,
+      device: device || null,
       storage_path: input.storagePath,
       width: input.width,
       height: input.height,

@@ -7,9 +7,9 @@ import { useEffect, useRef, useState } from "react";
 import { createPhoto, discardUploads } from "@/app/actions";
 import { SiteHeader } from "@/components/site-header";
 import { UploadSuccess } from "./upload-success";
-import { LOCATION_MAX_LENGTH, MAX_FILES_PER_UPLOAD } from "@/lib/constants";
-import { formatTakenAtLong } from "@/lib/dates";
-import { readTakenDate } from "@/lib/exif";
+import { DEVICE_MAX_LENGTH, LOCATION_MAX_LENGTH, MAX_FILES_PER_UPLOAD } from "@/lib/constants";
+import { formatTakenAt, TAKEN_AT_PLACEHOLDER } from "@/lib/dates";
+import { readPhotoMetadata } from "@/lib/exif";
 import { processImage } from "@/lib/image";
 import { createClient } from "@/lib/supabase/client";
 import { PHOTOS_BUCKET } from "@/lib/supabase/env";
@@ -44,6 +44,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
   const [selected, setSelected] = useState<Selected[]>([]);
   const [location, setLocation] = useState("");
   const [takenAt, setTakenAt] = useState("");
+  const [device, setDevice] = useState("");
   const [progress, setProgress] = useState<Progress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -90,21 +91,30 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
         file,
         previewUrl: URL.createObjectURL(file),
       }));
-      void prefillTakenAt(next.map((item) => item.file));
+      void prefillFromExif(next.map((item) => item.file));
       return [...current, ...next];
     });
   }
 
   /**
-   * La fecha se rellena sola con la del disparo, leida del EXIF. Solo se toca
-   * si el campo esta vacio: si ya la has elegido a mano, manda la tuya.
+   * La fecha y la camara se rellenan solas con lo que diga el EXIF. Solo se
+   * tocan los campos vacios: si ya has escrito algo, manda lo tuyo.
    */
-  async function prefillTakenAt(files: File[]) {
+  async function prefillFromExif(files: File[]) {
+    let needsDate = true;
+    let needsDevice = true;
+
     for (const file of files) {
-      const date = await readTakenDate(file);
-      if (date) {
-        setTakenAt((current) => current || date);
-        return;
+      if (!needsDate && !needsDevice) return;
+
+      const meta = await readPhotoMetadata(file);
+      if (needsDate && meta.takenAt) {
+        needsDate = false;
+        setTakenAt((current) => current || meta.takenAt!);
+      }
+      if (needsDevice && meta.device) {
+        needsDevice = false;
+        setDevice((current) => current || meta.device!.slice(0, DEVICE_MAX_LENGTH));
       }
     }
   }
@@ -150,6 +160,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
         const saved = await createPhoto({
           storagePath,
           takenAt,
+          device,
           width: processed.width,
           height: processed.height,
           blurDataUrl: processed.blurDataUrl,
@@ -333,7 +344,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
                 (busy ? " opacity-60" : "")
               }
             >
-              {(takenAt && formatTakenAtLong(takenAt)) || "12 de Septiembre de 2026"}
+              {(takenAt && formatTakenAt(takenAt)) || TAKEN_AT_PLACEHOLDER}
             </div>
             <input
               type="date"
@@ -348,6 +359,19 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
               className="absolute inset-0 h-full w-full cursor-pointer rounded-xl opacity-0 disabled:cursor-default"
             />
           </div>
+        </label>
+
+        <label className="flex flex-col gap-2">
+          <span className="text-[12px] font-semibold">Taken on</span>
+          <input
+            type="text"
+            value={device}
+            onChange={(event) => setDevice(event.target.value)}
+            placeholder="iPhone 17 Pro"
+            maxLength={DEVICE_MAX_LENGTH}
+            disabled={busy}
+            className="w-full rounded-xl bg-field px-4 py-3.5 text-[14px] outline-none placeholder:text-muted focus:ring-1 focus:ring-ink/20 disabled:opacity-60"
+          />
         </label>
 
         {progress ? (
