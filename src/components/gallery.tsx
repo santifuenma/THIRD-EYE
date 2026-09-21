@@ -69,7 +69,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
 
       <ul className="columns-1 gap-x-5 sm:columns-2 lg:columns-3">
         {visible.map((photo, index) => (
-          <li key={photo.id} className="group relative mb-9 break-inside-avoid sm:mb-7">
+          <li key={photo.id} className="group relative mb-5 break-inside-avoid sm:mb-4">
             {missing[photo.id] ? (
               <div>
                 <div
@@ -138,7 +138,7 @@ function Caption({ photo }: { photo: Photo }) {
   const date = formatTakenAt(photo.taken_at);
 
   return (
-    <span className="mt-2 flex items-start justify-between gap-4 text-left text-[11px] leading-[1.6] text-ink/70">
+    <span className="mt-1.5 flex items-start justify-between gap-4 text-left text-[11px] leading-[1.5] text-muted">
       <span className="min-w-0">
         {date ? <span className="block">{date}</span> : null}
         <span className="block">{photo.location}</span>
