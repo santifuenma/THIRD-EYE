@@ -13,7 +13,7 @@ export default async function HomePage() {
   return (
     <div className="mx-auto w-full max-w-[880px] px-4 pb-24 sm:px-6">
       <OwnerBar />
-      <SiteHeader linkToHome={false} />
+      <SiteHeader secret />
       <main className="mt-10 sm:mt-12">
         <Gallery photos={photos} />
       </main>

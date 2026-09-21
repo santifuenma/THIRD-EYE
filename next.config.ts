@@ -1,7 +1,17 @@
 import type { NextConfig } from "next";
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const supabaseHost = supabaseUrl ? new URL(supabaseUrl).hostname : undefined;
+function supabaseHostname(): string | undefined {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  if (!url) return undefined;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    // Un .env.local a medio rellenar no deberia tumbar el dev server.
+    return undefined;
+  }
+}
+
+const hostname = supabaseHostname();
 
 const nextConfig: NextConfig = {
   images: {
@@ -12,8 +22,8 @@ const nextConfig: NextConfig = {
     // espacio. Si algun dia quieres que Vercel las reprocese, pon esto en
     // false y deja los remotePatterns de abajo.
     unoptimized: true,
-    remotePatterns: supabaseHost
-      ? [{ protocol: "https", hostname: supabaseHost, pathname: "/storage/v1/object/public/**" }]
+    remotePatterns: hostname
+      ? [{ protocol: "https", hostname, pathname: "/storage/v1/object/public/**" }]
       : [],
   },
 };

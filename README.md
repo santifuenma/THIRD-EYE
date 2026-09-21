@@ -25,8 +25,13 @@ proyecto de Vercel. Solo el dominio.
 | Ruta | Qué es | Acceso |
 | --- | --- | --- |
 | `/` | Galería: logo, claim y retícula de fotos con su localización. Click abre el visor a pantalla completa. | Pública (prerenderizada, revalida cada 5 min) |
-| `/login` | Email + contraseña. | Pública |
+| `/login` | Email + contraseña. | Pública, sin enlaces entrantes |
 | `/upload` | Selección de fotos, campo `Location, Country`, `PUBLISH` y pantalla de confirmación. | Solo con sesión |
+
+**El acceso a la zona privada está escondido.** La galería no enseña ningún
+enlace de admin: tres clicks seguidos sobre el logo de la home (con menos de
+0,8 s entre uno y otro) llevan a `/login`, o directamente a `/upload` si ya hay
+sesión. Clicks sueltos o espaciados no hacen nada.
 
 Con sesión iniciada aparecen además el botón `UPLOAD` flotante en la galería y
 un `Delete` sobre cada foto.
