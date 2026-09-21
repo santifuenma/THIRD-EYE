@@ -8,7 +8,7 @@ const inter = Inter({
   display: "swap",
 });
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://app.santiagofuenmayorruiz.com";
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://thirdeye.santiagofuenmayorruiz.com";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),

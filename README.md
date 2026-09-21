@@ -1,6 +1,6 @@
 # THIRD EYE
 
-Portfolio de fotografía en `app.santiagofuenmayorruiz.com`. Galería pública,
+Portfolio de fotografía en `thirdeye.santiagofuenmayorruiz.com`. Galería pública,
 subida privada desde el móvil, y un pipeline que comprime cada foto en el
 navegador antes de que toque el servidor.
 
@@ -93,14 +93,14 @@ publicar.
 1. Sube el repo a GitHub y **Add New → Project** en Vercel. Next.js se detecta
    solo; no hace falta tocar el build.
 2. **Settings → Environment Variables**: las tres de arriba, con
-   `NEXT_PUBLIC_SITE_URL=https://app.santiagofuenmayorruiz.com`.
-3. **Settings → Domains → Add**: `app.santiagofuenmayorruiz.com`.
+   `NEXT_PUBLIC_SITE_URL=https://thirdeye.santiagofuenmayorruiz.com`.
+3. **Settings → Domains → Add**: `thirdeye.santiagofuenmayorruiz.com`.
    - Si `santiagofuenmayorruiz.com` ya está en la misma cuenta de Vercel, el
      subdominio se configura solo.
    - Si el DNS está en otro sitio, añade el registro que te indique Vercel
-     (normalmente `CNAME app → cname.vercel-dns.com`).
+     (normalmente `CNAME thirdeye → cname.vercel-dns.com`).
 4. En Supabase → **Authentication → URL Configuration**, pon
-   `https://app.santiagofuenmayorruiz.com` como *Site URL*.
+   `https://thirdeye.santiagofuenmayorruiz.com` como *Site URL*.
 
 El portfolio personal no se toca en ningún momento.
 
