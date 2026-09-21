@@ -8,7 +8,7 @@
 export function SiteFooter() {
   return (
     <footer className="mt-16 pt-4 text-center sm:mt-20">
-      <p className="caps text-[11px] font-medium text-ink">
+      <p className="caps animate-fade-in text-[11px] font-medium text-ink">
         Captured by Santiago Fuenmayor Ruiz&rsquo;s third eye
       </p>
     </footer>

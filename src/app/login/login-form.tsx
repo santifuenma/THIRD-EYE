@@ -52,7 +52,11 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="mt-10 flex w-full flex-col gap-4">
+    <form
+      onSubmit={onSubmit}
+      className="animate-rise mt-10 flex w-full flex-col gap-4"
+      style={{ animationDelay: "100ms" }}
+    >
       <label className="flex flex-col gap-2">
         <span className="text-[12px] font-semibold">Email</span>
         <input
@@ -88,7 +92,7 @@ export function LoginForm() {
       <button
         type="submit"
         disabled={pending}
-        className="caps mt-2 w-full cursor-pointer rounded-full bg-ink py-4 text-[12px] font-medium text-paper transition-opacity hover:opacity-90 disabled:opacity-40"
+        className="caps mt-2 w-full cursor-pointer rounded-full bg-ink py-4 text-[12px] font-medium text-paper transition-[opacity,transform] duration-200 hover:opacity-90 active:scale-[0.99] disabled:opacity-40 disabled:active:scale-100"
       >
         {pending ? "Entering" : "Enter"}
       </button>

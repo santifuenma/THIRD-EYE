@@ -39,11 +39,14 @@ export function SiteHeader({
   }
 
   return (
-    <header className="flex flex-col items-center pt-10 sm:pt-14">
+    <header className="animate-fade-in flex flex-col items-center pt-10 sm:pt-14">
       {logo}
 
       {tagline ? (
-        <p className="caps mt-5 text-center text-[11px] leading-[1.8] font-medium sm:text-[12px]">
+        <p
+          className="caps animate-rise mt-5 text-center text-[11px] leading-[1.8] font-medium sm:text-[12px]"
+          style={{ animationDelay: "120ms" }}
+        >
           Use your third eye
           <br />
           To look at the world around you

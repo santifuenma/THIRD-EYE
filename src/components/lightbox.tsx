@@ -50,7 +50,7 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
       role="dialog"
       aria-modal="true"
       aria-label={photo.location}
-      className="fixed inset-0 z-50 flex flex-col bg-paper"
+      className="animate-zoom-in fixed inset-0 z-50 flex flex-col bg-paper"
     >
       <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <span className="caps flex min-w-0 items-baseline gap-3 text-[11px] font-medium">
@@ -84,7 +84,7 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
           priority
           quality={85}
           sizes="(min-width: 640px) 90vw, 100vw"
-          className="max-h-full w-auto max-w-full object-contain"
+          className="animate-fade-in max-h-full w-auto max-w-full object-contain"
         />
       </div>
 

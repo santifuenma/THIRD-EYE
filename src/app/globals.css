@@ -10,6 +10,36 @@
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, sans-serif;
 
   --tracking-caps: 0.16em;
+
+  /*
+   * Curva de salida (empieza rapido, frena al final): es la que da sensacion
+   * de suavidad sin que nada parezca lento.
+   */
+  --ease-soft: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --animate-fade-in: fade-in 0.45s ease-out both;
+  --animate-rise: rise 0.5s var(--ease-soft) both;
+  --animate-zoom-in: zoom-in 0.25s var(--ease-soft) both;
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+}
+
+@keyframes zoom-in {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
 }
 
 :root {

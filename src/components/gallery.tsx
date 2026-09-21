@@ -15,6 +15,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const [pendingId, setPendingId] = useState<string | null>(null);
   const [missing, setMissing] = useState<Record<string, true>>({});
+  const [loaded, setLoaded] = useState<Record<string, true>>({});
   const [error, setError] = useState<string | null>(null);
   const [, startTransition] = useTransition();
   const isOwner = useIsOwner();
@@ -42,6 +43,13 @@ export function Gallery({ photos }: { photos: Photo[] }) {
   // roto; al dueno se le ensena marcado, para que pueda borrar la fila.
   function markMissing(id: string) {
     setMissing((current) => (current[id] ? current : { ...current, [id]: true }));
+  }
+
+  // La foto entra fundiendose sobre su propio placeholder borroso. Si la imagen
+  // venia de cache, `onLoad` ya salto antes de hidratar: por eso se comprueba
+  // tambien `complete` al montar, o se quedaria invisible.
+  function markLoaded(id: string) {
+    setLoaded((current) => (current[id] ? current : { ...current, [id]: true }));
   }
 
   const visible = isOwner ? photos : photos.filter((photo) => !missing[photo.id]);
@@ -90,19 +98,31 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                 aria-label={`Ver la foto de ${photo.location}`}
                 className="block w-full cursor-pointer"
               >
-                <span className="relative block w-full overflow-hidden bg-field sm:aspect-[3/4]">
+                <span
+                  className="relative block w-full overflow-hidden bg-field bg-cover bg-center sm:aspect-[3/4]"
+                  style={
+                    photo.blur_data_url
+                      ? { backgroundImage: `url(${photo.blur_data_url})` }
+                      : undefined
+                  }
+                >
                   <Image
+                    ref={(node) => {
+                      if (node?.complete) markLoaded(photo.id);
+                    }}
                     src={photo.url}
                     alt={photo.location}
                     width={photo.width}
                     height={photo.height}
-                    placeholder={photo.blur_data_url ? "blur" : "empty"}
-                    blurDataURL={photo.blur_data_url ?? undefined}
                     loading={index < 6 ? "eager" : "lazy"}
                     quality={85}
                     sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
+                    onLoad={() => markLoaded(photo.id)}
                     onError={() => markMissing(photo.id)}
-                    className="h-auto w-full transition-opacity duration-300 group-hover:opacity-90 sm:absolute sm:inset-0 sm:h-full sm:object-cover"
+                    className={
+                      "h-auto w-full transition-[opacity,transform] duration-500 ease-out sm:absolute sm:inset-0 sm:h-full sm:object-cover sm:group-hover:scale-[1.02] " +
+                      (loaded[photo.id] ? "opacity-100" : "opacity-0")
+                    }
                   />
                 </span>
                 <Caption photo={photo} />

@@ -259,7 +259,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
                 {selected.map((item) => (
                   <div
                     key={item.key}
-                    className="relative aspect-square overflow-hidden rounded-lg bg-line"
+                    className="animate-rise relative aspect-square overflow-hidden rounded-lg bg-line"
                   >
                     <Image
                       src={item.previewUrl}
@@ -375,7 +375,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
         </label>
 
         {progress ? (
-          <div className="flex flex-col gap-2" aria-live="polite">
+          <div className="animate-fade-in flex flex-col gap-2" aria-live="polite">
             <p className="caps text-[11px] text-muted">
               {STEP_LABEL[progress.step]} {progress.index} / {progress.total}
             </p>
@@ -389,7 +389,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
         ) : null}
 
         {error ? (
-          <p role="alert" className="text-[12px] text-ink">
+          <p role="alert" className="animate-rise text-[12px] text-ink">
             {error}
           </p>
         ) : null}
@@ -400,7 +400,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
           type="button"
           onClick={publish}
           disabled={!canPublish}
-          className="caps w-full cursor-pointer rounded-full bg-ink py-4 text-[12px] font-medium text-paper transition-opacity hover:opacity-90 disabled:cursor-default disabled:opacity-30"
+          className="caps w-full cursor-pointer rounded-full bg-ink py-4 text-[12px] font-medium text-paper transition-[opacity,transform] duration-200 hover:opacity-90 active:scale-[0.99] disabled:cursor-default disabled:opacity-30 disabled:active:scale-100"
         >
           {busy ? "Publishing" : "Publish"}
         </button>
