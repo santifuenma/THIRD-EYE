@@ -171,13 +171,16 @@ se interpreta como UTC y en husos negativos mostraría el día 11.
 Una tanda de subida comparte lugar, fecha y cámara. Si las fotos son de días
 distintos, súbelas por separado.
 
-## El mosaico
+## La retícula
 
-Las fotos se muestran a su proporción original, sin recortes, en un mosaico de
-columnas CSS (`columns-*` con `break-inside-avoid`). Una retícula por filas
-dejaría huecos irregulares cada vez que una horizontal y una vertical comparten
-fila. El precio es que las columnas se leen de arriba abajo, no de izquierda a
-derecha.
+En escritorio todas las teselas miden lo mismo: se recortan a 3:4 —el formato de
+la cámara del móvil— con `object-cover`, para que la cuadrícula sea regular
+aunque las fotos no lo sean. En móvil, donde hay una sola columna, cada foto se
+ve entera a su proporción.
+
+El recorte es solo de presentación: al abrir el visor se ve la foto completa,
+sin tocar. Para cambiar el formato de la cuadrícula basta con el
+`sm:aspect-[3/4]` de [`gallery.tsx`](src/components/gallery.tsx).
 
 ---
 

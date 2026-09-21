@@ -67,15 +67,18 @@ export function Gallery({ photos }: { photos: Photo[] }) {
         </p>
       ) : null}
 
-      <ul className="columns-1 gap-x-5 sm:columns-2 lg:columns-3">
+      {/*
+        En movil cada foto se ve entera, a su proporcion. En escritorio todas
+        se recortan a 3:4 (el formato de la camara del movil) para que la
+        cuadricula sea regular; la foto completa se ve al abrir el visor.
+        Para cambiar el formato, toca el `sm:aspect-[3/4]` de abajo.
+      */}
+      <ul className="grid grid-cols-1 gap-x-5 gap-y-5 sm:grid-cols-2 sm:gap-y-4 lg:grid-cols-3">
         {visible.map((photo, index) => (
-          <li key={photo.id} className="group relative mb-5 break-inside-avoid sm:mb-4">
+          <li key={photo.id} className="group relative">
             {missing[photo.id] ? (
               <div>
-                <div
-                  className="flex w-full items-center justify-center bg-field"
-                  style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
-                >
+                <div className="flex w-full items-center justify-center bg-field aspect-[3/4]">
                   <span className="caps text-[10px] text-muted">File missing</span>
                 </div>
                 <Caption photo={photo} />
@@ -87,7 +90,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                 aria-label={`Ver la foto de ${photo.location}`}
                 className="block w-full cursor-pointer"
               >
-                <span className="block w-full overflow-hidden bg-field">
+                <span className="relative block w-full overflow-hidden bg-field sm:aspect-[3/4]">
                   <Image
                     src={photo.url}
                     alt={photo.location}
@@ -99,7 +102,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                     quality={85}
                     sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
                     onError={() => markMissing(photo.id)}
-                    className="h-auto w-full transition-opacity duration-300 group-hover:opacity-90"
+                    className="h-auto w-full transition-opacity duration-300 group-hover:opacity-90 sm:absolute sm:inset-0 sm:h-full sm:object-cover"
                   />
                 </span>
                 <Caption photo={photo} />
