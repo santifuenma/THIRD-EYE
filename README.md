@@ -24,9 +24,9 @@ proyecto de Vercel. Solo el dominio.
 
 | Ruta | Qué es | Acceso |
 | --- | --- | --- |
-| `/` | Galería: logo, claim y retícula de fotos con su localización. Click abre el visor a pantalla completa. | Pública (prerenderizada, revalida cada 5 min) |
+| `/` | Galería: logo, claim y mosaico de fotos con su localización y fecha. Click abre el visor a pantalla completa. | Pública (prerenderizada, revalida cada 5 min) |
 | `/login` | Email + contraseña. | Pública, sin enlaces entrantes |
-| `/upload` | Selección de fotos, campo `Location, Country`, `PUBLISH` y pantalla de confirmación. | Solo con sesión |
+| `/upload` | Selección de fotos, campos `Location, Country` y `Date taken`, `PUBLISH` y pantalla de confirmación. | Solo con sesión |
 
 **El acceso a la zona privada está escondido.** La galería no enseña ningún
 enlace de admin: tres clicks seguidos sobre el logo de la home (con menos de
@@ -146,6 +146,34 @@ tal cual.
 Un efecto secundario que conviene conocer: repintar en un canvas **elimina los
 metadatos EXIF**, incluida la geolocalización del móvil. La localización que se
 publica es solo la que escribes a mano.
+
+## La fecha
+
+El campo `Date taken` se rellena solo: al elegir la foto se le lee el EXIF
+([`src/lib/exif.ts`](src/lib/exif.ts), un lector mínimo de unas cien líneas sin
+dependencias) y se saca `DateTimeOriginal`. Tiene que pasar antes del procesado,
+porque el canvas se lleva los metadatos por delante.
+
+Si el archivo no trae fecha —un PNG, una captura, un HEIC— el campo se queda
+vacío y la eliges tú. Encima de la caja hay un `<input type="date">`
+transparente: aporta el selector nativo (en el móvil, la ruleta) mientras la
+caja de debajo mantiene el formato de la marca, que el navegador no deja
+personalizar.
+
+La fecha se guarda como `date` (sin hora ni huso) y se formatea partiendo la
+cadena a mano en [`src/lib/dates.ts`](src/lib/dates.ts): un `new Date("2026-09-12")`
+se interpreta como UTC y en husos negativos mostraría el día 11.
+
+Una tanda de subida comparte localización y fecha. Si las fotos son de días
+distintos, súbelas por separado.
+
+## El mosaico
+
+Las fotos se muestran a su proporción original, sin recortes, en un mosaico de
+columnas CSS (`columns-*` con `break-inside-avoid`). Una retícula por filas
+dejaría huecos irregulares cada vez que una horizontal y una vertical comparten
+fila. El precio es que las columnas se leen de arriba abajo, no de izquierda a
+derecha.
 
 ---
 

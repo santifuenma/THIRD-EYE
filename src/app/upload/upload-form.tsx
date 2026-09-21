@@ -8,6 +8,8 @@ import { createPhoto, discardUploads } from "@/app/actions";
 import { SiteHeader } from "@/components/site-header";
 import { UploadSuccess } from "./upload-success";
 import { LOCATION_MAX_LENGTH, MAX_FILES_PER_UPLOAD } from "@/lib/constants";
+import { formatTakenAtLong } from "@/lib/dates";
+import { readTakenDate } from "@/lib/exif";
 import { processImage } from "@/lib/image";
 import { createClient } from "@/lib/supabase/client";
 import { PHOTOS_BUCKET } from "@/lib/supabase/env";
@@ -41,6 +43,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
   const inputRef = useRef<HTMLInputElement>(null);
   const [selected, setSelected] = useState<Selected[]>([]);
   const [location, setLocation] = useState("");
+  const [takenAt, setTakenAt] = useState("");
   const [progress, setProgress] = useState<Progress | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
@@ -60,7 +63,8 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
   }, []);
 
   const busy = progress !== null;
-  const canPublish = selected.length > 0 && location.trim().length > 0 && !busy;
+  const canPublish =
+    selected.length > 0 && location.trim().length > 0 && takenAt.length > 0 && !busy;
 
   function addFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
@@ -86,8 +90,23 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
         file,
         previewUrl: URL.createObjectURL(file),
       }));
+      void prefillTakenAt(next.map((item) => item.file));
       return [...current, ...next];
     });
+  }
+
+  /**
+   * La fecha se rellena sola con la del disparo, leida del EXIF. Solo se toca
+   * si el campo esta vacio: si ya la has elegido a mano, manda la tuya.
+   */
+  async function prefillTakenAt(files: File[]) {
+    for (const file of files) {
+      const date = await readTakenDate(file);
+      if (date) {
+        setTakenAt((current) => current || date);
+        return;
+      }
+    }
   }
 
   function removeFile(key: string) {
@@ -130,6 +149,7 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
         setProgress({ index: index + 1, total: selected.length, step: "saving" });
         const saved = await createPhoto({
           storagePath,
+          takenAt,
           width: processed.width,
           height: processed.height,
           blurDataUrl: processed.blurDataUrl,
@@ -295,6 +315,39 @@ export function UploadForm({ locations, storedLabel, photoCount }: UploadFormPro
               <option key={item} value={item} />
             ))}
           </datalist>
+        </label>
+
+        <label className="flex flex-col gap-2">
+          <span className="text-[12px] font-semibold">Date taken</span>
+          {/*
+            El <input type="date"> va encima, transparente: aporta el selector
+            nativo (y en el movil, la ruleta) mientras la caja de abajo mantiene
+            el formato de la marca, que el navegador no deja personalizar.
+          */}
+          <div className="relative">
+            <div
+              aria-hidden="true"
+              className={
+                "w-full rounded-xl bg-field px-4 py-3.5 text-[14px] " +
+                (takenAt ? "text-ink" : "text-muted") +
+                (busy ? " opacity-60" : "")
+              }
+            >
+              {(takenAt && formatTakenAtLong(takenAt)) || "12 de Septiembre de 2026"}
+            </div>
+            <input
+              type="date"
+              value={takenAt}
+              onChange={(event) => setTakenAt(event.target.value)}
+              onClick={(event) => {
+                // Chrome solo abre el calendario al pulsar su icono, que aqui
+                // es invisible.
+                event.currentTarget.showPicker?.();
+              }}
+              disabled={busy}
+              className="absolute inset-0 h-full w-full cursor-pointer rounded-xl opacity-0 disabled:cursor-default"
+            />
+          </div>
         </label>
 
         {progress ? (

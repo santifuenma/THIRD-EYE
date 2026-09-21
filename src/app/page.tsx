@@ -11,7 +11,7 @@ export default async function HomePage() {
   const photos = await getPhotos();
 
   return (
-    <div className="mx-auto w-full max-w-[880px] px-4 pb-24 sm:px-6">
+    <div className="mx-auto w-full max-w-[1120px] px-4 pb-24 sm:px-6">
       <OwnerBar />
       <SiteHeader secret />
       <main className="mt-10 sm:mt-12">

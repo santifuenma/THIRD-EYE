@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 
 import { LOCATION_MAX_LENGTH } from "@/lib/constants";
+import { isPlausibleTakenAt } from "@/lib/dates";
 import { PHOTOS_BUCKET } from "@/lib/supabase/env";
 import { createClient } from "@/lib/supabase/server";
 
@@ -10,6 +11,8 @@ export type ActionResult<T = null> = { ok: true; data: T } | { ok: false; error:
 
 export type NewPhotoInput = {
   storagePath: string;
+  /** Fecha de captura en formato `YYYY-MM-DD`. */
+  takenAt: string;
   width: number;
   height: number;
   blurDataUrl: string;
@@ -47,6 +50,9 @@ export async function createPhoto(input: NewPhotoInput): Promise<ActionResult<{ 
   if (!STORAGE_PATH_RE.test(input.storagePath)) {
     return { ok: false, error: "Ruta de archivo no valida." };
   }
+  if (!isPlausibleTakenAt(input.takenAt)) {
+    return { ok: false, error: "La fecha no es valida." };
+  }
   if (!isPositiveInt(input.width, 10_000) || !isPositiveInt(input.height, 10_000)) {
     return { ok: false, error: "Dimensiones de imagen no validas." };
   }
@@ -66,6 +72,7 @@ export async function createPhoto(input: NewPhotoInput): Promise<ActionResult<{ 
     .insert({
       owner_id: user.id,
       location,
+      taken_at: input.takenAt,
       storage_path: input.storagePath,
       width: input.width,
       height: input.height,

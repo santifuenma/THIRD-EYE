@@ -11,6 +11,7 @@ create table if not exists public.photos (
   id uuid primary key default gen_random_uuid(),
   owner_id uuid not null default auth.uid() references auth.users (id) on delete cascade,
   location text not null check (char_length(location) between 1 and 80),
+  taken_at date,
   storage_path text not null,
   width integer not null check (width > 0),
   height integer not null check (height > 0),
@@ -24,6 +25,9 @@ create index if not exists photos_created_at_idx on public.photos (created_at de
 -- Migracion: antes se guardaba ademas una miniatura. Ahora hay una sola
 -- version de cada foto y Vercel genera los tamanos que pide cada pantalla.
 alter table public.photos drop column if exists thumb_path;
+
+-- Migracion: fecha de captura, que se lee del EXIF al subir.
+alter table public.photos add column if not exists taken_at date;
 
 alter table public.photos enable row level security;
 

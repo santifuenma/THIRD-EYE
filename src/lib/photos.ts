@@ -5,6 +5,8 @@ import { createPublicClient } from "@/lib/supabase/public";
 export type PhotoRow = {
   id: string;
   location: string;
+  /** Fecha de captura en formato `YYYY-MM-DD`. */
+  taken_at: string | null;
   storage_path: string;
   width: number;
   height: number;
@@ -19,7 +21,7 @@ export type Photo = PhotoRow & {
 };
 
 const PHOTO_COLUMNS =
-  "id, location, storage_path, width, height, blur_data_url, bytes, created_at";
+  "id, location, taken_at, storage_path, width, height, blur_data_url, bytes, created_at";
 
 /** Tope de fotos por pagina de galeria. Suficiente para un portfolio personal. */
 export const GALLERY_LIMIT = 300;

@@ -7,6 +7,7 @@ import { useState, useTransition } from "react";
 
 import { Lightbox } from "@/components/lightbox";
 import { deletePhoto } from "@/app/actions";
+import { formatTakenAt } from "@/lib/dates";
 import type { Photo } from "@/lib/photos";
 import { useIsOwner } from "@/lib/use-owner";
 
@@ -66,17 +67,18 @@ export function Gallery({ photos }: { photos: Photo[] }) {
         </p>
       ) : null}
 
-      <ul className="grid grid-cols-1 gap-y-7 sm:grid-cols-3 sm:gap-x-4 sm:gap-y-6">
+      <ul className="columns-1 gap-x-5 sm:columns-2 lg:columns-3">
         {visible.map((photo, index) => (
-          <li key={photo.id} className="group relative">
+          <li key={photo.id} className="group relative mb-9 break-inside-avoid sm:mb-7">
             {missing[photo.id] ? (
               <div>
-                <div className="flex aspect-square w-full items-center justify-center bg-field">
+                <div
+                  className="flex w-full items-center justify-center bg-field"
+                  style={{ aspectRatio: `${photo.width} / ${photo.height}` }}
+                >
                   <span className="caps text-[10px] text-muted">File missing</span>
                 </div>
-                <span className="mt-2 block text-left text-[11px] text-ink/70">
-                  {photo.location}
-                </span>
+                <Caption photo={photo} />
               </div>
             ) : (
               <button
@@ -85,7 +87,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                 aria-label={`Ver la foto de ${photo.location}`}
                 className="block w-full cursor-pointer"
               >
-                <span className="relative block w-full overflow-hidden bg-field sm:aspect-square">
+                <span className="block w-full overflow-hidden bg-field">
                   <Image
                     src={photo.url}
                     alt={photo.location}
@@ -95,14 +97,12 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                     blurDataURL={photo.blur_data_url ?? undefined}
                     loading={index < 6 ? "eager" : "lazy"}
                     quality={85}
-                    sizes="(min-width: 640px) 280px, 100vw"
+                    sizes="(min-width: 1024px) 360px, (min-width: 640px) 50vw, 100vw"
                     onError={() => markMissing(photo.id)}
-                    className="h-auto w-full object-cover transition-opacity duration-300 group-hover:opacity-90 sm:absolute sm:inset-0 sm:h-full"
+                    className="h-auto w-full transition-opacity duration-300 group-hover:opacity-90"
                   />
                 </span>
-                <span className="mt-2 block text-left text-[11px] text-ink/70">
-                  {photo.location}
-                </span>
+                <Caption photo={photo} />
               </button>
             )}
 
@@ -130,5 +130,17 @@ export function Gallery({ photos }: { photos: Photo[] }) {
         />
       ) : null}
     </>
+  );
+}
+
+/** Pie de foto: la localizacion a un lado y la fecha de captura al otro. */
+function Caption({ photo }: { photo: Photo }) {
+  const date = formatTakenAt(photo.taken_at);
+
+  return (
+    <span className="mt-2 flex items-baseline justify-between gap-3 text-left text-[11px] text-ink/70">
+      <span>{photo.location}</span>
+      {date ? <span className="shrink-0">{date}</span> : null}
+    </span>
   );
 }

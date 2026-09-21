@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useCallback, useEffect } from "react";
 
+import { formatTakenAt } from "@/lib/dates";
 import type { Photo } from "@/lib/photos";
 
 type LightboxProps = {
@@ -51,8 +52,13 @@ export function Lightbox({ photos, index, onClose, onNavigate }: LightboxProps) 
       aria-label={photo.location}
       className="fixed inset-0 z-50 flex flex-col bg-paper"
     >
-      <div className="flex items-center justify-between px-4 py-4 sm:px-6">
-        <span className="caps text-[11px] font-medium">{photo.location}</span>
+      <div className="flex items-center justify-between gap-4 px-4 py-4 sm:px-6">
+        <span className="caps flex min-w-0 items-baseline gap-3 text-[11px] font-medium">
+          <span className="truncate">{photo.location}</span>
+          {formatTakenAt(photo.taken_at) ? (
+            <span className="shrink-0 text-muted">{formatTakenAt(photo.taken_at)}</span>
+          ) : null}
+        </span>
         <button
           type="button"
           onClick={onClose}
