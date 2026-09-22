@@ -99,7 +99,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                 className="block w-full cursor-pointer"
               >
                 <span
-                  className="relative block w-full overflow-hidden bg-field bg-cover bg-center sm:aspect-[3/4]"
+                  className="relative block w-full overflow-hidden bg-field bg-cover bg-center transition-opacity duration-300 sm:aspect-[3/4] sm:group-hover:opacity-90"
                   style={
                     photo.blur_data_url
                       ? { backgroundImage: `url(${photo.blur_data_url})` }
@@ -120,7 +120,7 @@ export function Gallery({ photos }: { photos: Photo[] }) {
                     onLoad={() => markLoaded(photo.id)}
                     onError={() => markMissing(photo.id)}
                     className={
-                      "h-auto w-full transition-[opacity,transform] duration-500 ease-out sm:absolute sm:inset-0 sm:h-full sm:object-cover sm:group-hover:scale-[1.02] " +
+                      "h-auto w-full transition-opacity duration-500 ease-out sm:absolute sm:inset-0 sm:h-full sm:object-cover " +
                       (loaded[photo.id] ? "opacity-100" : "opacity-0")
                     }
                   />
